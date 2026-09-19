@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tạo Mã QR Chuyển Khoản Tự Động - Dương Gia Bảo</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 min-h-screen text-slate-100 flex items-center justify-center p-4">
+<div class="max-w-xl w-full bg-slate-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-700/50 overflow-hidden p-6 md:p-8">
+<!-- Header -->
+<div class="text-center mb-6">
+<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-600/20 text-indigo-400 mb-3 border border-indigo-500/30">
+<i class="fa-solid fa-qrcode text-3xl"></i>
+</div>
+<h1 class="text-2xl font-bold tracking-tight text-white">Tạo Mã QR Chuyển Khoản</h1>
+<p class="text-sm text-slate-400 mt-1">Nhập số tiền để tự động cập nhật mã QR thanh toán</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+<!-- Form Input -->
+<div class="space-y-4">
+<div>
+<label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Ngân hàng</label>
+<select id="bankCode" class="w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+<option value="970422">MB Bank (Quân Đội)</option>
+<option value="970436">Vietcombank (VCB)</option>
+<option value="970415">VietinBank</option>
+<option value="970418">BIDV</option>
+<option value="970405">Agribank</option>
+<option value="970407">Techcombank</option>
+<option value="970423">TPBank</option>
+<option value="970422">VPBank</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Số tài khoản</label>
+<input type="text" id="accountNo" value="01891891891890" class="w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+</div>
+<div>
+<label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Chủ tài khoản</label>
+<input type="text" id="accountName" value="DUONG GIA BAO" class="w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white uppercase focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+</div>
+<div>
+<label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Số tiền cần chuyển (VNĐ)</label>
+<input type="number" id="amount" placeholder="VD: 50000" class="w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition font-semibold text-indigo-400">
+<!-- Quick Amount Buttons -->
+<div class="flex flex-wrap gap-1.5 mt-2">
+<button type="button" onclick="setAmount(50000)" class="px-2.5 py-1 text-xs bg-slate-700 hover:bg-slate-600 rounded-md transition text-slate-200">50K</button>
+<button type="button" onclick="setAmount(100000)" class="px-2.5 py-1 text-xs bg-slate-700 hover:bg-slate-600 rounded-md transition text-slate-200">100K</button>
+<button type="button" onclick="setAmount(200000)" class="px-2.5 py-1 text-xs bg-slate-700 hover:bg-slate-600 rounded-md transition text-slate-200">200K</button>
+<button type="button" onclick="setAmount(500000)" class="px-2.5 py-1 text-xs bg-slate-700 hover:bg-slate-600 rounded-md transition text-slate-200">500K</button>
+<button type="button" onclick="setAmount(1000000)" class="px-2.5 py-1 text-xs bg-slate-700 hover:bg-slate-600 rounded-md transition text-slate-200">1M</button>
+</div>
+</div>
+<div>
+<label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Nội dung chuyển khoản</label>
+<input type="text" id="addInfo" value="Thanh toan don hang" placeholder="VD: Ung ho / Thanh toan" class="w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+</div>
+</div>
+<!-- QR Preview Card -->
+<div class="flex flex-col items-center justify-center bg-slate-900/60 p-5 rounded-xl border border-slate-700/50">
+<div class="relative group w-full bg-white p-3 rounded-xl shadow-lg flex flex-col items-center">
+<img id="qrImage" src="" alt="VietQR Code" class="w-full max-h-[260px] object-contain rounded-md transition transform group-hover:scale-[1.02]">
+<div id="loadingOverlay" class="absolute inset-0 bg-white/80 rounded-xl flex items-center justify-center hidden">
+<i class="fa-solid fa-spinner animate-spin text-indigo-600 text-2xl"></i>
+</div>
+</div>
+<div class="w-full mt-4 flex gap-2">
+<button onclick="downloadQR()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5 shadow-md">
+<i class="fa-solid fa-download"></i> Tải ảnh QR
+</button>
+<button onclick="copyQRLink()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5">
+<i class="fa-solid fa-link"></i> Sao chép Link
+</button>
+</div>
+</div>
+</div>
+<!-- Footer Info -->
+<div class="mt-6 pt-4 border-t border-slate-700/50 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+Hệ thống VietQR tự động cập nhật theo thời gian thực
+</div>
+</div>
+<script>
+const bankCodeInput = document.getElementById('bankCode');
+const accountNoInput = document.getElementById('accountNo');
+const accountNameInput = document.getElementById('accountName');
+const amountInput = document.getElementById('amount');
+const addInfoInput = document.getElementById('addInfo');
+const qrImage = document.getElementById('qrImage');
+function setAmount(val) {
+amountInput.value = val;
+updateQR();
+}
+function updateQR() {
+const bank = bankCodeInput.value;
+const account = accountNoInput.value.trim();
+const amount = amountInput.value.trim();
+const info = encodeURIComponent(addInfoInput.value.trim());
+// Build VietQR URL (compact2 style)
+let url = ⁠https://img.vietqr.io/image/${bank}-${account}-compact2.png⁠;
+let params = [];
+if (amount) {
+params.push(⁠amount=${amount}⁠);
+}
+if (info) {
+params.push(⁠addInfo=${info}⁠);
+}
+if (params.length > 0) {
+url += '?' + params.join('&');
+}
+qrImage.src = url;
+}
+// Add event listeners for dynamic updates
+[bankCodeInput, accountNoInput, accountNameInput, amountInput, addInfoInput].forEach(element => {
+element.addEventListener('input', updateQR);
+element.addEventListener('change', updateQR);
+});
+function downloadQR() {
+const currentSrc = qrImage.src;
+if(!currentSrc) return;
+const a = document.createElement('a');
+a.href = currentSrc;
+a.download = ⁠VietQR-${accountNoInput.value}-${amountInput.value || '0'}.png⁠;
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a);
+}
+function copyQRLink() {
+const currentSrc = qrImage.src;
+if(!currentSrc) return;
+navigator.clipboard.writeText(currentSrc).then(() => {
+alert('Đã sao chép đường dẫn mã QR thành công!');
+});
+}
+// Initialize on load
+updateQR();
+</script>
+</body>
+</html>
